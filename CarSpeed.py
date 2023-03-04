@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 # define the video capture object
-cap = cv2.VideoCapture('yrhacks-car-camera/car-passing-by.mp4')
+cap = cv2.VideoCapture('car-passing-by.mp4')
 
 # define the parameters for object detection and tracking
 object_detector = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=40)
