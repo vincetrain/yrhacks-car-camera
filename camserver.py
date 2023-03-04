@@ -37,7 +37,6 @@ model_weights = 'yolov4-tiny.weights'
 
 net = cv2.dnn.readNetFromDarknet(model_config, model_weights)
 
-## tells net to PREFER USING MY GPU but cv2 is not compiled to work with gpu... and im too lazy to do that...
 net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
 net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
@@ -65,10 +64,10 @@ while(True):
             color = COLORS[int(class_id) % len(COLORS)]
             class_name = class_names[class_id]
             if (class_name in VEHICLES):
-                plate = licenseocr.get_plate(frame[box[1]:box[1]+box[3], box[0]:box[0]+box[2]])
-                if (plate != None or plate != ''):
-                    print(plate)
-                label = "%s : %f" % (class_name, score)
+                plate, conf = licenseocr.get_plate(frame[box[1]:box[1]+box[3], box[0]:box[0]+box[2]])
+                if plate == '':
+                    plate = 'License Not Found'
+                label = "%s : %s : %f" % (class_name, plate, score)
                 cv2.rectangle(frame, box, color, 2)
                 cv2.putText(frame, label, (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         
