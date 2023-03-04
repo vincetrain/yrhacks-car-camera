@@ -17,12 +17,12 @@ VEHICLES = ['car', 'truck', 'motorbike', 'bus']
 
 ## initializes model and network
 
-class_file = open('data/coco.names')
+class_file = open('C:/Users/Erin Tomorri/Desktop/yrhacks-car-camera/data/coco.names')
 class_names = class_file.read().splitlines()
 
 COLORS = np.random.uniform(0, 255, size=(len(class_names), 3))
 
-model_config = 'cfg/yolov4-tiny.cfg'
+model_config = 'cfg\yolov4-tiny.cfg'
 model_weights = 'yolov4-tiny.weights'
 
 net = cv2.dnn.readNetFromDarknet(model_config, model_weights)
@@ -45,7 +45,7 @@ car_tracker = {}
 car_speeds = {}
 
 while(True):
-    cam = cv2.VideoCapture('examples/example-footage-1.mp4')
+    cam = cv2.VideoCapture('car-passing-by.mp4')
 
     while(cam != None):
         ret, frame = cam.read()
@@ -63,7 +63,7 @@ while(True):
         
         def get_points(frame):
             # detect the car in the frame
-            car_cascade = cv2.CascadeClassifier('cars.xml')
+            car_cascade = cv2.CascadeClassifier('cascades\cars.xml')
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             cars = car_cascade.detectMultiScale(gray, 1.1, 1)
 
@@ -83,8 +83,6 @@ while(True):
             
             return speed
         
-
-
         for (class_id, score, box) in zip(classes, scores, boxes):
             color = COLORS[int(class_id) % len(COLORS)]
             class_name = class_names[class_id]
