@@ -15,12 +15,12 @@ import numpy as np
 import cv2
 import licenseocr
 
-CONFIDENCE_THRESHOLD = 0.4
+CONFIDENCE_THRESHOLD = 0.45
 NMS_THRESHOLD = 0.2
 
 VEHICLES = ['car', 'truck', 'motorbike', 'bus']
 
-## initializes model and network
+## initializes model and network for cars
 
 class_file = open('./data/coco.names')
 class_names = class_file.read().splitlines()
@@ -60,23 +60,24 @@ while(True):
         
         classes, scores, boxes = model.detect(frame, CONFIDENCE_THRESHOLD, NMS_THRESHOLD)
 
-        end = time.time()
-        
-        fps = 1 / (end-start)
-        
         for (class_id, score, box) in zip(classes, scores, boxes):
+            # print(class_names[class_id], score, box)
             color = COLORS[int(class_id) % len(COLORS)]
             class_name = class_names[class_id]
             if (class_name in VEHICLES):
-                # plate = licenseocr.get_plate(frame[box[1]:box[1]+box[3], box[0]:box[0]+box[2]])
-                # if (plate != None or plate != ''):
-                #     print(plate)
+                plate = licenseocr.get_plate(frame[box[1]:box[1]+box[3], box[0]:box[0]+box[2]])
+                if (plate != None or plate != ''):
+                    print(plate)
                 label = "%s : %f" % (class_name, score)
                 cv2.rectangle(frame, box, color, 2)
                 cv2.putText(frame, label, (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         
         
-        fps_label = f'FPS: {fps:.2f}'
+        end = time.time()
+        
+        fps = 1 / (end-start)
+        
+        fps_label = f'Model FPS: {fps:.2f}'
         cv2.putText(frame, fps_label, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
         
         cv2.namedWindow('Camera Footage', cv2.WINDOW_NORMAL)

@@ -17,13 +17,13 @@ VEHICLES = ['car', 'truck', 'motorbike', 'bus']
 
 ## initializes model and network
 
-class_file = open('yrhacks-car-camera\data\coco.names')
+class_file = open('data/coco.names')
 class_names = class_file.read().splitlines()
 
 COLORS = np.random.uniform(0, 255, size=(len(class_names), 3))
 
-model_config = 'yrhacks-car-camera\cfg\yolov4.cfg'
-model_weights = 'yrhacks-car-camera\cfg\yolov4.weights'
+model_config = 'cfg/yolov4-tiny.cfg'
+model_weights = 'yolov4-tiny.weights'
 
 net = cv2.dnn.readNetFromDarknet(model_config, model_weights)
 
@@ -45,7 +45,7 @@ car_tracker = {}
 car_speeds = {}
 
 while(True):
-    cam = cv2.VideoCapture('yrhacks-car-camera\example-footage.mp4')
+    cam = cv2.VideoCapture('examples/example-footage-1.mp4')
 
     while(cam != None):
         ret, frame = cam.read()
