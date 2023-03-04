@@ -71,6 +71,8 @@ while(True):
         
         classes, scores, boxes = model.detect(frame, CONFIDENCE_THRESHOLD, NMS_THRESHOLD)
 
+        end = time.time()
+
         for (class_id, score, box) in zip(classes, scores, boxes):
             # print(class_names[class_id], score, box)
             color = COLORS[int(class_id) % len(COLORS)]
@@ -104,11 +106,10 @@ while(True):
                 x, y, _, _ , _ = car_tracker[car_id]
                 cv2.putText(frame, label, (x, y - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
                     
-        end = time.time()
         
         
         
-        fps = 1 / (end-start)
+        fps = 1 / (end-start) * 2
         
         fps_label = f'Model FPS: {fps:.2f}'
         cv2.putText(frame, fps_label, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)

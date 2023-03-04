@@ -39,6 +39,7 @@ def get_plate(frame):
             
     print(text.replace(' ', ''), confsum)
     return text.replace(' ', ''), confsum
+    
         
 if __name__ == '__main__':
     print('this does nothing when you run it. please don\'t run it.')
