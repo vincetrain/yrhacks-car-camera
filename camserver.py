@@ -12,6 +12,7 @@ X Computer vision to detect cars
 
 import time
 import numpy as np
+import math
 import cv2
 import licenseocr
 
@@ -45,6 +46,17 @@ model.setInputParams(size=(416, 416), scale=1/255, swapRB=True)
 
 ## main loop
 
+def calculate_speed(old_pos, new_pos, fps):
+    # Calculate the distance between the two positions
+    distance = math.sqrt((new_pos[0] - old_pos[0])**2 + (new_pos[1] - old_pos[1])**2)
+    
+    # Calculate the speed by dividing the distance by the time between frames
+    speed = distance * fps
+    
+    return speed
+
+car_tracker = {}
+car_speeds = {}
 
 while(True):
     cam = cv2.VideoCapture('examples/example-footage-1.mp4')
@@ -65,14 +77,36 @@ while(True):
             class_name = class_names[class_id]
             if (class_name in VEHICLES):
                 plate, conf = licenseocr.get_plate(frame[box[1]:box[1]+box[3], box[0]:box[0]+box[2]])
-                if plate == '':
+                if plate == '' or conf < 20:
                     plate = 'License Not Found'
-                label = "%s : %s : %f" % (class_name, plate, score)
+                label = "%s, %s : %f" % (class_name, plate, score)
                 cv2.rectangle(frame, box, color, 2)
                 cv2.putText(frame, label, (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         
-        
+                # check if a car is already being tracked
+                if class_id in car_tracker:
+                    # calculate speed
+                    new_x, new_y, new_w, new_h = box
+                    old_x, old_y, old_w, old_h, _ = car_tracker[class_id]
+                    speed = calculate_speed((old_x, old_y), (new_x, new_y), 2)
+                    car_speeds[class_id] = speed
+                    # update tracker
+                    car_tracker[class_id] = (new_x, new_y, new_w, new_h, time.time())
+                else:
+                    # add car to tracker
+                    car_tracker[class_id] = (box[0], box[1], box[2], box[3], time.time())
+                    car_speeds[class_id] = 0
+            
+        # display speed of each tracked car
+        for car_id, speed in car_speeds.items():
+            if speed is not None:
+                label = "Speed: {} km/h".format(round(speed, 2))
+                x, y, _, _ , _ = car_tracker[car_id]
+                cv2.putText(frame, label, (x, y - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    
         end = time.time()
+        
+        
         
         fps = 1 / (end-start)
         

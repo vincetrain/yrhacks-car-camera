@@ -17,12 +17,12 @@ VEHICLES = ['car', 'truck', 'motorbike', 'bus']
 
 ## initializes model and network
 
-class_file = open('C:/Users/Erin Tomorri/Desktop/yrhacks-car-camera/data/coco.names')
+class_file = open('data/coco.names')
 class_names = class_file.read().splitlines()
 
 COLORS = np.random.uniform(0, 255, size=(len(class_names), 3))
 
-model_config = 'cfg\yolov4-tiny.cfg'
+model_config = 'cfg/yolov4-tiny.cfg'
 model_weights = 'yolov4-tiny.weights'
 
 net = cv2.dnn.readNetFromDarknet(model_config, model_weights)
@@ -45,7 +45,7 @@ car_tracker = {}
 car_speeds = {}
 
 while(True):
-    cam = cv2.VideoCapture('car-passing-by.mp4')
+    cam = cv2.VideoCapture('examples\example-footage-1.mp4')
 
     while(cam != None):
         ret, frame = cam.read()
@@ -87,11 +87,11 @@ while(True):
             color = COLORS[int(class_id) % len(COLORS)]
             class_name = class_names[class_id]
             if (class_name in VEHICLES):
-                plate = licenseocr.get_plate(frame[box[1]:box[1]+box[3], box[0]:box[0]+box[2]])
-                if (plate != None or plate != ''):
-                    print(plate)
+                plate, conf = licenseocr.get_plate(frame[box[1]:box[1]+box[3], box[0]:box[0]+box[2]])
+                if plate == '' or conf < 20:
+                    plate = 'License Not Found'
+                label = "%s : %s : %f" % (class_name, plate, score)
                 
-                label = "%s : %f" % (class_name, score)
                 cv2.rectangle(frame, box, color, 2)
                 cv2.putText(frame, label, (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
                 
