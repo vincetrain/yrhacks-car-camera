@@ -7,6 +7,7 @@
 
 
 <b>Quick Explaination</b>
+
 This code is an implementation of a vehicle detection and speed measurement system using computer vision. Here is a brief summary of what the code does:
 
 - It imports necessary libraries like time, numpy, cv2, pytesseract, and math.
