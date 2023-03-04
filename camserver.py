@@ -13,9 +13,12 @@ X Computer vision to detect cars
 import time
 import numpy as np
 import cv2
+import licenseocr
 
 CONFIDENCE_THRESHOLD = 0.8
 NMS_THRESHOLD = 0.6
+
+VEHICLES = ['car', 'truck', 'motorbike', 'bus']
 
 ## initializes model and network
 
@@ -38,46 +41,52 @@ model.setInputParams(size=(416, 416), scale=1/255, swapRB=True)
 
 ## main loop
 
-cam = cv2.VideoCapture('example-footage.mp4')
+cv2.namedWindow('Camera Footage', cv2.WINDOW_NORMAL)
 
 while(True):
-    ret, frame = cam.read()
-    cam_width, cam_height, _ = frame.shape
-    if not ret:
-        break
-    
-    start = time.time()
-    
-    classes, scores, boxes = model.detect(frame, CONFIDENCE_THRESHOLD, NMS_THRESHOLD)
+    cam = cv2.VideoCapture('example-footage.mp4')
 
-    end = time.time()
-    
-    fps = 1 / (end-start)
-    
-    for (class_id, score, box) in zip(classes, scores, boxes):
-        color = COLORS[int(class_id) % len(COLORS)]
+    while(cam != None):
+        ret, frame = cam.read()
+        cam_width, cam_height, _ = frame.shape
+        if not ret:
+            break
+        
+        start = time.time()
+        
+        classes, scores, boxes = model.detect(frame, CONFIDENCE_THRESHOLD, NMS_THRESHOLD)
 
-        label = "%s : %f" % (class_names[class_id], score)
-        cv2.rectangle(frame, box, color, 2)
-        cv2.putText(frame, label, (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-    
-    
-    fps_label = f'FPS: {fps:.2f}'
-    cv2.putText(frame, fps_label, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-    
-    cv2.namedWindow('Camera Footage', cv2.WINDOW_NORMAL)
-    cv2.imshow('Camera Footage', frame)
-    
-    key = cv2.waitKey(1)
-    
-    if key == ord('q'):
-        break
-    
-    if key == ord(' '):
-        while (cv2.waitKey(-1) != ord(' ')):
-            print('Video paused. Press [SPACE] to unpause.')
-    
-cam.release()
+        end = time.time()
+        
+        fps = 1 / (end-start)
+        
+        for (class_id, score, box) in zip(classes, scores, boxes):
+            color = COLORS[int(class_id) % len(COLORS)]
+            class_name = class_names[class_id]
+            if (class_name in VEHICLES):
+                plate = licenseocr.get_plate(frame[box[1]:box[1]+box[3], box[0]:box[0]+box[2]])
+                if (plate != None or plate != ''):
+                    print(plate)
+                label = "%s : %f" % (class_name, score)
+                cv2.rectangle(frame, box, color, 2)
+                cv2.putText(frame, label, (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        
+        
+        fps_label = f'FPS: {fps:.2f}'
+        cv2.putText(frame, fps_label, (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+        
+        cv2.imshow('Camera Footage', frame)
+        
+        key = cv2.waitKey(1)
+        
+        if key == ord('q'):
+            break
+        
+        if key == ord(' '):
+            while (cv2.waitKey(-1) != ord(' ')):
+                print('Video paused. Press [SPACE] to unpause.')
+        
+    cam.release()
 
-cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
 
